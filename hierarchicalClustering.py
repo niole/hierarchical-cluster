@@ -59,23 +59,73 @@ def getAllScores(reviews):
         return sorted(scores, lambda x, y: cmp(x, y, lambda a: a[2]))
 
 def getClosestPair(reviews):
+    '''
+        get closest pair
+        turn into cluster
+        average all data together
+        keep score
+        score against all other clusters and then find closest clusters again
+        continue until only one cluster left
+    '''
     allScores = getAllScores(data)
     return allScores.pop()
+
+class HierarchicalCluster:
+    """
+        manages cluster creation and merging logic
+    """
+    def __init__(self, data):
+        self.clusters = self.initClusters(data)
+
+    def __str__(self):
+        output = "["
+        for i in range(len(self.clusters)):
+            output += self.clusters[i].__str__()
+
+        return output+"]"
+
+    def initClusters(self, data):
+        #assumes that data is a list of dicts
+        return [ Cluster(d) for d in data ]
 
 
 class Cluster:
     """
             binary tree node
-            two child clusters
+            two or zero child clusters
     """
-    def __init__(self, data):
-        self.score = 0
-        self.children = []
+    def __init__(self, data, children = []):
+        self.score = 1
+        self.name = data.keys()[0]
+        self.data = data
+        self.children = children
+
+        self.initCluster()
+
+    def __str__(self):
+        if len(self.children) > 0:
+            return "{ score: s=%s, name: n=%s, data: d=%s, children: [x=%s, y=%s] }" % (str(self.score), self.name, self.data , self.children[0].__str__() , self.children[1].__str__())
+        return "{ score: s=%s, name: n=%s, data: d=%s, children: [] }" % (str(self.score), self.name, self.data)
+
+
+    def initCluster(self):
+        if len(self.children) > 0:
+            #combine child data to get curr data
+            c1 = self.children[0]
+            c2 = self.children[1]
+            childName1 = c1.keys()[0]
+            childName2 = c2.keys()[0]
+            combinedChildren = { k: (v1 + c2[childName2][k])/2 for k, v1 in c1[childName1].items() if k in c2[childName2] }
+
+            self.data = { childName1 + childName2: combinedChildren }
+            self.name = nextName
+
 
 with open('data.json') as data_file:
-    delta = .05
-    data = json.load(data_file)
-    closestPair = getClosestPair(reviews)
-    print closestPair
+   # delta = .05
+   data = json.load(data_file)
+   # closestPair = getClosestPair(data)
+   # print closestPair
+   hc = HierarchicalCluster(data)
 
-    x = Cluster(data)
+   print(hc)
