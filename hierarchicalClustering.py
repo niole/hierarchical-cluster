@@ -56,7 +56,11 @@ def getAllScores(reviews):
                         score = getPearsonCo(shared[0], shared[1])[0, 1]
                         scores.append((k, l, score))
 
-        return sorted(scores, lambda x, y: cmp(x, y, lambda a: a[2], True))
+        return sorted(scores, lambda x, y: cmp(x, y, lambda a: a[2]))
+
+def getClosestPair(reviews):
+    allScores = getAllScores(data)
+    return allScores.pop()
 
 
 class Cluster:
@@ -71,7 +75,7 @@ class Cluster:
 with open('data.json') as data_file:
     delta = .05
     data = json.load(data_file)
-    res = getAllScores(data)
-    print res
+    closestPair = getClosestPair(reviews)
+    print closestPair
 
     x = Cluster(data)
