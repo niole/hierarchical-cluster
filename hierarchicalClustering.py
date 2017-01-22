@@ -1,16 +1,16 @@
-import json
-import math
-import collections
-import numpy
-
-'''
+"""
 key is the person who was being reviewed, the keys of the dictionary
 that the top level key points to are the coworkers who reviewed and
 the numbers they point to are their score out of 5 for the reviewee
 
 want to cluster people based on their coworkers' opinions of them
 similar opinions, closer together
-'''
+"""
+
+import json
+import math
+import collections
+import numpy
 
 
 class HierarchicalCluster:
@@ -39,7 +39,7 @@ class HierarchicalCluster:
         clusters = self.clusters
 
         if len(clusters) > 1:
-            '''
+            """
                 combine more clusters
                 get closest pair
                 turn into cluster
@@ -47,7 +47,7 @@ class HierarchicalCluster:
                 keep score
                 score against all other clusters and then find closest clusters again
                 continue until only one cluster left
-            '''
+            """
             allScores = self.getAllScores(clusters)
             closestPair = allScores.pop()
 
@@ -67,9 +67,8 @@ class HierarchicalCluster:
 
             return self.build()
 
-
-    def getPearsonCo(self, r1, r2):
-        return numpy.corrcoef(r1, r2)
+    def getPearsonCo(self, matrix):
+        return numpy.corrcoef(matrix)
 
     def cmp(self, x, y, accessor):
         if accessor(x) < accessor(y):
@@ -96,7 +95,8 @@ class HierarchicalCluster:
                     score = -1
 
                     if len(shared[0]) > 0:
-                        score = self.getPearsonCo(shared[0], shared[1])[0, 1]
+                        #score = self.getPearsonCo(shared[0], shared[1])[0, 1]
+                        score = self.getPearsonCo(shared)[0, 1]
                         if math.isnan(score):
                             score = -1
 
