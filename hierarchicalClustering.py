@@ -16,6 +16,7 @@ import numpy
 class HierarchicalCluster:
     """
         manages cluster creation and merging logic
+        manages querying logic
     """
     def __init__(self, data):
         self.clusters = []
@@ -95,7 +96,6 @@ class HierarchicalCluster:
                     score = -1
 
                     if len(shared[0]) > 0:
-                        #score = self.getPearsonCo(shared[0], shared[1])[0, 1]
                         score = self.getPearsonCo(shared)[0, 1]
                         if math.isnan(score):
                             score = -1
@@ -103,6 +103,11 @@ class HierarchicalCluster:
                     scores.append((a.name, b.name, score))
 
             return sorted(scores, lambda x, y: self.cmp(x, y, lambda a: a[2]))
+
+    def getClusterOfSize(self, groupSize):
+        assert type(groupSize) is int, "must specify groupSize to return, must be of type int"
+
+        return map(lambda c: c.getClusterOfSize(groupSize), self.clusters)[0]
 
 
 
@@ -124,6 +129,14 @@ class Cluster:
             return "{ score: %s, name: %s, data: %s, children: [%s, %s] }" % (str(self.score), self.name, self.data , self.children[0].__str__() , self.children[1].__str__())
         return "{ score: %s, name: %s, data: %s, children: [] }" % (str(self.score), self.name, self.data)
 
+    def getClusterOfSize(self, groupSize):
+        assert type(groupSize) is int, "must specify groupSize to return, must be of type int"
+
+        if len(self.name) <= groupSize:
+            return self
+        else:
+            return reduce(lambda a, b: a if len(a.name) > len(b.name) else b, map(lambda c: c.getClusterOfSize(groupSize), self.children))
+
     def getCombinedChildren(self):
         c1 = self.children[0]
         c2 = self.children[1]
@@ -141,4 +154,3 @@ class Cluster:
 
 with open('data.json') as data_file:
     data = json.load(data_file)
-    hc = HierarchicalCluster(data)
